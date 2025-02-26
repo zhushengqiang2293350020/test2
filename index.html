@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人网站收藏夹</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-size: 2.5em;
+            position: relative;
+            display: inline-block;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #3498db, transparent);
+        }
+
+        .search-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .import-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .import-btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .import-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #2ecc71, #3498db);
+        }
+
+        #search {
+            width: 300px;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #search:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52,152,219,0.3);
+        }
+
+        .category {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .category:hover {
+            transform: none;
+        }
+
+        .category h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            border-bottom: 2px solid rgba(52,152,219,0.3);
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .category h2:hover {
+            background: rgba(52,152,219,0.1);
+        }
+
+        .category h2::after {
+            content: '▼';
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .category.collapsed h2::after {
+            transform: rotate(-90deg);
+        }
+
+        .category .site-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            transition: all 0.3s ease;
+            max-height: 2000px;
+            opacity: 1;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .category.collapsed .site-list {
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 修改收起时的样式 */
+        .category.collapsed {
+            padding: 5px 25px;
+            margin-bottom: 15px;
+        }
+
+        .category.collapsed h2 {
+            margin-bottom: 0;
+            padding-bottom: 10px;
+            border-bottom: none;
+        }
+
+        .site-item {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .site-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+
+        .site-item a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            width: 100%;
+        }
+
+        .site-item h3 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 25px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding-right: 10px;
+        }
+
+        .site-item h3::before {
+            content: '🔗';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.9em;
+        }
+
+        .site-item p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            line-height: 1.4;
+            position: relative;
+            padding-left: 25px;
+            padding-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        @keyframes gradient {
+            0% {background-position: 0% 50%}
+            50% {background-position: 100% 50%}
+            100% {background-position: 0% 50%}
+        }
+
+        /* 添加响应式动画 */
+        @media (max-width: 768px) {
+            .site-list {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>我的网站导航</h1>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="search" placeholder="搜索网站...">
+        </div>
+
+        <div class="import-box">
+            <input type="file" id="bookmarkFile" accept=".html" style="display: none;">
+            <button class="import-btn" onclick="document.getElementById('bookmarkFile').click()">导入谷歌书签</button>
+        </div>
+
+        <div class="category">
+            <h2>常用工具</h2>
+            <div class="site-list">
+                <div class="site-item">
+                    <a href="https://www.google.com" target="_blank">
+                        <h3>Google</h3>
+                        <p>全球最大的搜索引擎</p>
+                    </a>
+                </div>
+                <div class="site-item">
+                    <a href="https://github.com" target="_blank">
+                        <h3>GitHub</h3>
+                        <p>代码托管平台</p>
+                    </a>
+                </div>
+                <div class="site-item">
+                    <a href="https://chat.openai.com" target="_blank">
+                        <h3>ChatGPT</h3>
+                        <p>AI智能助手</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="category">
+            <h2>学习资源</h2>
+            <div class="site-list">
+                <div class="site-item">
+                    <a href="https://www.bilibili.com" target="_blank">
+                        <h3>哔哩哔哩</h3>
+                        <p>视频学习平台</p>
+                    </a>
+                </div>
+                <div class="site-item">
+                    <a href="https://www.zhihu.com" target="_blank">
+                        <h3>知乎</h3>
+                        <p>问答社区</p>
+                    </a>
+                </div>
+                <div class="site-item">
+                    <a href="https://juejin.cn" target="_blank">
+                        <h3>掘金</h3>
+                        <p>技术社区</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const search = document.getElementById('search');
+        let siteItems = document.querySelectorAll('.site-item');
+
+        // 修改书签导入功能
+        document.getElementById('bookmarkFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(content, 'text/html');
+                
+                // 获取所有书签文件夹（DL标签）
+                const folders = doc.querySelectorAll('dl');
+                
+                // 将书签数据转换为层级结构
+                const bookmarkData = [];
+                
+                folders.forEach(folder => {
+                    const h3 = folder.previousElementSibling;
+                    if (h3 && h3.tagName === 'H3') {
+                        const folderName = h3.textContent;
+                        const links = folder.querySelectorAll('a');
+                        
+                        if (links.length > 0) {
+                            const bookmarks = Array.from(links).map(link => ({
+                                title: link.textContent,
+                                url: link.href
+                            }));
+                            
+                            bookmarkData.push({
+                                name: folderName,
+                                bookmarks: bookmarks
+                            });
+                        }
+                    }
+                });
+
+                // 保存到 localStorage
+                localStorage.setItem('importedBookmarks', JSON.stringify(bookmarkData));
+                
+                // 创建书签分类
+                createBookmarkCategories(bookmarkData);
+            };
+            reader.readAsText(file);
+        });
+
+        // 修改初始化折叠功能
+        function initializeCollapsibleCategories() {
+            document.querySelectorAll('.category').forEach(category => {
+                const h2 = category.querySelector('h2');
+                if (h2 && !h2.hasEventListener) {  // 检查是否已经添加过事件监听
+                    h2.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        category.classList.toggle('collapsed');
+                    });
+                    h2.hasEventListener = true;  // 标记已添加事件监听
+                }
+            });
+        }
+
+        // 在页面加载时初始化折叠功能
+        window.addEventListener('DOMContentLoaded', () => {
+            initializeCollapsibleCategories();
+            loadSavedBookmarks();
+        });
+
+        // 修改创建书签分类的函数
+        function createBookmarkCategories(bookmarkData) {
+            // 删除已存在的导入书签分类（如果有）
+            const existingCategories = document.querySelectorAll('.category[data-type="imported"]');
+            existingCategories.forEach(category => category.remove());
+
+            // 创建清除所有按钮
+            const clearAllBtn = document.createElement('div');
+            clearAllBtn.className = 'import-box';
+            clearAllBtn.innerHTML = `
+                <button onclick="clearBookmarks()" style="
+                    padding: 8px 15px;
+                    background: #e74c3c;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    margin-bottom: 20px;">
+                    清除所有导入的书签
+                </button>
+            `;
+            document.querySelector('.container').appendChild(clearAllBtn);
+
+            // 创建每个分类
+            bookmarkData.forEach(folder => {
+                const importedCategory = document.createElement('div');
+                importedCategory.className = 'category';
+                importedCategory.setAttribute('data-type', 'imported');
+                importedCategory.innerHTML = `
+                    <h2>${folder.name}</h2>
+                    <div class="site-list"></div>
+                `;
+                
+                const siteList = importedCategory.querySelector('.site-list');
+                
+                folder.bookmarks.forEach(bookmark => {
+                    const siteItem = document.createElement('div');
+                    siteItem.className = 'site-item';
+                    siteItem.innerHTML = `
+                        <a href="${bookmark.url}" target="_blank">
+                            <h3>${bookmark.title}</h3>
+                            <p>${bookmark.url}</p>
+                        </a>
+                    `;
+                    siteList.appendChild(siteItem);
+                });
+                
+                document.querySelector('.container').appendChild(importedCategory);
+            });
+
+            // 创建每个分类后初始化折叠功能
+            initializeCollapsibleCategories();
+
+            // 更新搜索范围
+            siteItems = document.querySelectorAll('.site-item');
+        }
+
+        // 修改加载保存的书签函数
+        function loadSavedBookmarks() {
+            const savedBookmarks = localStorage.getItem('importedBookmarks');
+            if (savedBookmarks) {
+                const bookmarkData = JSON.parse(savedBookmarks);
+                createBookmarkCategories(bookmarkData);
+            }
+        }
+
+        // 修改清除书签的函数
+        function clearBookmarks() {
+            if (confirm('确定要清除所有导入的书签吗？')) {
+                localStorage.removeItem('importedBookmarks');
+                const importedCategories = document.querySelectorAll('.category[data-type="imported"]');
+                importedCategories.forEach(category => category.remove());
+                const clearAllBtn = document.querySelector('.import-box button');
+                if (clearAllBtn) {
+                    clearAllBtn.parentElement.remove();
+                }
+                // 更新搜索范围
+                siteItems = document.querySelectorAll('.site-item');
+            }
+        }
+
+        // 搜索功能保持不变
+        search.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            
+            siteItems.forEach(item => {
+                const title = item.querySelector('h3').textContent.toLowerCase();
+                const description = item.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(searchText) || description.includes(searchText)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
